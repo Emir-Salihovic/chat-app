@@ -13,8 +13,6 @@ app.use(
   })
 );
 
-app.use(protect);
-
 app.get('/', (_: Request, response: Response) => {
   response.send('<h1>Hello from chat app!</h1>');
 });

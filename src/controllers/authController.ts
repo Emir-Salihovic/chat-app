@@ -4,7 +4,7 @@ import asyncHandler from '../utils/asyncHandler';
 import createSendToken from '../utils/signToken';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
   user?: IUser;
 }
 

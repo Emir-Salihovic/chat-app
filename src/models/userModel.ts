@@ -19,7 +19,11 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
       required: [true, 'Please provide a username.'],
       unique: true
     },
-    password: { type: String, required: [true, 'Please provide a password.'] }
+    password: {
+      type: String,
+      required: [true, 'Please provide a password.'],
+      select: false
+    }
   },
   {
     versionKey: false

@@ -1,6 +1,17 @@
 import app from './app';
+import { Server } from 'socket.io';
+
+import { createServer } from 'node:http';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+
+// SOCKET IO
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*'
+  }
+});
 
 dotenv.config({ path: '.env' });
 
@@ -20,6 +31,10 @@ mongoose
 
 const PORT = process.env.PORT || 6000;
 
-app.listen(PORT, () => {
+io.on('connection', (socket) => {
+  console.log('a user connected');
+});
+
+server.listen(PORT, () => {
   console.log(`App started on port ${PORT}!`);
 });

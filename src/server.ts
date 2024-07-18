@@ -6,7 +6,7 @@ dotenv.config({ path: '.env' });
 
 const DB = process.env.DB?.replace(
   '<PASSWORD>',
-  process.env.DB_PASSWORD as string
+  process.env.DB_PASSWORD!
 ) as string;
 
 mongoose

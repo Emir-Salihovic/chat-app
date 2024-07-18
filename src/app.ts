@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import userRouter from './routers/userRouter';
+import roomRouter from './routers/roomRouter';
 import cors from 'cors';
 
 const app = express();
@@ -16,5 +17,6 @@ app.get('/', (_: Request, response: Response) => {
 });
 
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/room', roomRouter);
 
 export default app;

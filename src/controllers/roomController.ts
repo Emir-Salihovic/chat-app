@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import Room from '../models/roomModel';
 import { CustomRequest } from './authController';
@@ -27,3 +27,12 @@ export const getUserRooms = asyncHandler(
     });
   }
 );
+
+export const getAllRooms = asyncHandler(async (req: Request, res: Response) => {
+  const rooms = await Room.find();
+
+  res.status(200).json({
+    message: 'success',
+    rooms
+  });
+});

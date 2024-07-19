@@ -6,7 +6,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .get(authController.protect, roomController.getUserRooms)
+  .get(authController.protect, roomController.getAllRooms)
   .post(authController.protect, roomController.createRoom);
 
 export default router;

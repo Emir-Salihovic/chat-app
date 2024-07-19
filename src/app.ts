@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import userRouter from './routers/userRouter';
 import roomRouter from './routers/roomRouter';
 import cors from 'cors';
-import { protect } from './controllers/authController';
 
 const app = express();
 

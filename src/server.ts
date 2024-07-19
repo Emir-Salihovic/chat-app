@@ -4,6 +4,9 @@ import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import RoomMember from './models/roomMemberModel';
+import Room from './models/roomModel';
+import User from './models/userModel';
 
 // SOCKET IO
 const server = createServer(app);
@@ -33,6 +36,40 @@ const PORT = process.env.PORT || 6000;
 
 io.on('connection', (socket) => {
   console.log('a user connected');
+
+  // Event: Join Room
+  socket.on('joinRoom', async ({ userId, roomId }) => {
+    try {
+      // Find or create the room
+      const room = await Room.findById(roomId);
+      const user = await User.findById(userId);
+
+      if (!room) {
+        socket.emit('error', 'Room not found');
+        return;
+      }
+
+      // Add user to room members
+      await RoomMember.create({ userId, roomId });
+
+      // Join the socket.io room
+      socket.join(roomId);
+
+      // Notify room members
+      io.to(roomId).emit('message', `${user?.username} has joined the room`);
+
+      console.log(`User ${userId} joined room ${roomId}`);
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', 'Failed to join room');
+    }
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+    // Handle any cleanup if necessary
+  });
 });
 
 server.listen(PORT, () => {

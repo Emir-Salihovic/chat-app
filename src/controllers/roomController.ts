@@ -2,6 +2,7 @@ import { Response, Request } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import Room from '../models/roomModel';
 import { CustomRequest } from './authController';
+import RoomMember from '../models/roomMemberModel';
 
 export const createRoom = asyncHandler(
   async (req: CustomRequest, res: Response) => {
@@ -36,3 +37,27 @@ export const getAllRooms = asyncHandler(async (req: Request, res: Response) => {
     rooms
   });
 });
+
+export const getRoomsJoinedByUser = asyncHandler(
+  async (req: CustomRequest, res: Response) => {
+    const roomsJoined = await RoomMember.find({
+      userId: req?.user?._id
+    });
+
+    res.status(200).json({
+      message: 'success',
+      roomsJoined
+    });
+  }
+);
+
+export const getSingleRoom = asyncHandler(
+  async (req: Request, res: Response) => {
+    const room = await Room.findById(req.params.id);
+
+    res.status(200).json({
+      message: 'success',
+      room
+    });
+  }
+);

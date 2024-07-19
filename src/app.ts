@@ -17,6 +17,6 @@ app.get('/', (_: Request, response: Response) => {
 });
 
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/room', roomRouter);
+app.use('/api/v1/rooms', roomRouter);
 
 export default app;

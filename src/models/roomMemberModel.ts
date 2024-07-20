@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 interface IRoomMember extends Document {
   userId: mongoose.Schema.Types.ObjectId;
   roomId: mongoose.Schema.Types.ObjectId;
+  online: boolean;
 }
 
 const RoomMemberSchema: Schema = new Schema(
@@ -16,6 +17,10 @@ const RoomMemberSchema: Schema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Room',
       required: true
+    },
+    online: {
+      type: Boolean,
+      default: true
     }
   },
   {

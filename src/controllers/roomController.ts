@@ -61,7 +61,7 @@ export const getSingleRoom = asyncHandler(
     Check if the user trying to access the room
     has joined the room.
     */
-    const isRoomMember = await RoomMember.findOne({
+    const roomMember = await RoomMember.findOne({
       roomId: room._id,
       userId: req?.user?._id
     });
@@ -69,7 +69,21 @@ export const getSingleRoom = asyncHandler(
     res.status(200).json({
       message: 'success',
       room,
-      hasJoinedRoom: !!isRoomMember
+      hasJoinedRoom: !!roomMember
+    });
+  }
+);
+
+export const getOnlineRoomMembers = asyncHandler(
+  async (req: Request, res: Response) => {
+    const onlineMembers = await RoomMember.find({
+      roomId: req.params.id,
+      online: true
+    }).select('-_id -roomId -online');
+
+    res.status(200).json({
+      message: 'success',
+      onlineMembers
     });
   }
 );

@@ -26,12 +26,12 @@ export const getRoomMessages = asyncHandler(
     /**
      * Check if the user should see the messages.
      */
-    const isRoomMember = await RoomMember.findOne({
+    const roomMember = await RoomMember.findOne({
       roomId: req.params.id,
       userId: req?.user?._id
     });
 
-    if (isRoomMember) {
+    if (roomMember) {
       roomMessages = await RoomMessage.find({
         roomId: req.params.id
       }).populate('userId');

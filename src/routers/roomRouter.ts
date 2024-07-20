@@ -18,6 +18,10 @@ router.get(
 );
 
 router
+  .route('/online/:id')
+  .get(authController.protect, roomController.getOnlineRoomMembers);
+
+router
   .route('/count/:id')
   .get(authController.protect, roomController.getRoomMembersCount);
 

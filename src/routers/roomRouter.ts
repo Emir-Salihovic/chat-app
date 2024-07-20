@@ -18,6 +18,10 @@ router.get(
 );
 
 router
+  .route('/count/:id')
+  .get(authController.protect, roomController.getRoomMembersCount);
+
+router
   .route('/messages/:id')
   .get(authController.protect, messageController.getRoomMessages)
   .post(authController.protect, messageController.createRoomMessage);

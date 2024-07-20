@@ -73,3 +73,21 @@ export const getSingleRoom = asyncHandler(
     });
   }
 );
+
+export const getRoomMembersCount = asyncHandler(
+  async (req: Request, res: Response) => {
+    /**
+     * When joining room on socket event we made sure
+     * that the document cannot be created if it already
+     * exists, so this query checks for unique members.
+     */
+    const roomMembersCount = await RoomMember.find({
+      roomId: req.params.id
+    }).countDocuments();
+
+    res.status(200).json({
+      message: 'success',
+      roomMembersCount
+    });
+  }
+);

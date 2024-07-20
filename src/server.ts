@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import RoomMember from './models/roomMemberModel';
 import Room from './models/roomModel';
 import User from './models/userModel';
+import RoomMessage from './models/messageModel';
 
 // SOCKET IO
 const server = createServer(app);
@@ -63,6 +64,28 @@ io.on('connection', (socket) => {
       console.error(err);
       socket.emit('error', 'Failed to join room');
     }
+  });
+
+  // Event: Message sent in room
+  socket.on('messageSent', async ({ userId, roomId, message }) => {
+    await RoomMessage.create({
+      userId,
+      roomId,
+      message
+    });
+
+    const user = await User.findById(userId);
+
+    if (!user) return;
+
+    const polishedMessage = {
+      username: user.username,
+      message,
+      avatar: '' // add later
+    };
+
+    // Notify room members
+    io.to(roomId).emit('messageReceived', polishedMessage);
   });
 
   // Handle disconnection

@@ -31,6 +31,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     res.status(400).json({
       error: 'Please provide username and password.'
     });
+    return;
   }
   // 2) Check if user exists && password is correct
   const user = await User.findOne({ username }).select('+password');
@@ -39,6 +40,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     res.status(401).json({
       error: 'Incorrect username or password'
     });
+    return;
   }
 
   // 3) If everything ok, send token to client

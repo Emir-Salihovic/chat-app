@@ -47,6 +47,14 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   createSendToken(user as IUser, 200, req, res);
 });
 
+export const logout = (_: Request, res: Response) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({ status: 'success' });
+};
+
 export const protect = asyncHandler(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     // 1) Getting token and check of it's there

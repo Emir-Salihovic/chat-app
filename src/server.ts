@@ -40,6 +40,8 @@ io.on('connection', (socket) => {
 
   // Event: Join Room
   socket.on('joinRoom', async ({ userId, roomId }) => {
+    if (!roomId || !userId) return;
+
     try {
       // Find or create the room
       const room = await Room.findById(roomId);
@@ -50,8 +52,13 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Add user to room members
-      await RoomMember.create({ userId, roomId });
+      // First check if a room member already exists
+      const roomMember = await RoomMember.findOne({ userId, roomId });
+
+      if (!roomMember) {
+        // Add user to room members
+        await RoomMember.create({ userId, roomId });
+      }
 
       // Join the socket.io room
       socket.join(roomId);

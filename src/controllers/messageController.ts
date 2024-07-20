@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import { CustomRequest } from './authController';
 import RoomMessage from '../models/messageModel';
+import RoomMember from '../models/roomMemberModel';
 
 export const createRoomMessage = asyncHandler(
   async (req: CustomRequest, res: Response) => {
@@ -19,10 +20,22 @@ export const createRoomMessage = asyncHandler(
 );
 
 export const getRoomMessages = asyncHandler(
-  async (req: Request, res: Response) => {
-    const roomMessages = await RoomMessage.find({
-      roomId: req.params.id
-    }).populate('userId');
+  async (req: CustomRequest, res: Response) => {
+    let roomMessages: any = [];
+
+    /**
+     * Check if the user should see the messages.
+     */
+    const isRoomMember = await RoomMember.findOne({
+      roomId: req.params.id,
+      userId: req?.user?._id
+    });
+
+    if (isRoomMember) {
+      roomMessages = await RoomMessage.find({
+        roomId: req.params.id
+      }).populate('userId');
+    }
 
     res.status(200).json({
       roomMessages

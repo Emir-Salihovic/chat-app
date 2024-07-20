@@ -52,12 +52,24 @@ export const getRoomsJoinedByUser = asyncHandler(
 );
 
 export const getSingleRoom = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: CustomRequest, res: Response) => {
     const room = await Room.findById(req.params.id);
+
+    if (!room) return;
+
+    /*
+    Check if the user trying to access the room
+    has joined the room.
+    */
+    const isRoomMember = await RoomMember.findOne({
+      roomId: room._id,
+      userId: req?.user?._id
+    });
 
     res.status(200).json({
       message: 'success',
-      room
+      room,
+      hasJoinedRoom: !!isRoomMember
     });
   }
 );

@@ -58,6 +58,16 @@ io.on('connection', (socket) => {
       if (!roomMember) {
         // Add user to room members
         await RoomMember.create({ userId, roomId });
+      } else {
+        if (!roomMember.online) {
+          roomMember.online = true;
+          await roomMember.save({ validateBeforeSave: false });
+
+          io.to(roomId).emit(
+            'userChangedRoom',
+            `user ${userId} changed room: ${roomId}`
+          );
+        }
       }
 
       // Join the socket.io room
@@ -93,6 +103,32 @@ io.on('connection', (socket) => {
 
     // Notify room members
     io.to(roomId).emit('messageReceived', polishedMessage);
+  });
+
+  // Handle room leaving
+  /**
+     * A room is considered left when?
+        1. A user changes the room with intention, params room id changes
+        2. A user closes the window, later on this
+        3. A user logs out
+        4. A user clicks leave room button
+        5. Wifi goes off (optional)
+     */
+  socket.on('roomChanged', async ({ userId, roomId }) => {
+    //1) A user changes the room with intention, params room id changes
+    const roomMember = await RoomMember.findOne({ userId, roomId });
+
+    if (roomMember) {
+      // Set the online status to offline
+      roomMember.online = false;
+      await roomMember.save({ validateBeforeSave: false });
+
+      io.to(roomId).emit(
+        'userChangedRoom',
+        `user ${userId} changed room: ${roomId}`
+      );
+      return;
+    }
   });
 
   // Handle disconnection

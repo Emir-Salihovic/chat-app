@@ -114,8 +114,12 @@ io.on('connection', (socket) => {
         4. A user clicks leave room button
         5. Wifi goes off (optional)
      */
+
+  /*
+    1) A user changes the room with intention, params room id changes,
+    so we change the online presence for that room.
+  */
   socket.on('roomChanged', async ({ userId, roomId }) => {
-    //1) A user changes the room with intention, params room id changes
     const roomMember = await RoomMember.findOne({ userId, roomId });
 
     if (roomMember) {
@@ -128,6 +132,49 @@ io.on('connection', (socket) => {
         `user ${userId} changed room: ${roomId}`
       );
       return;
+    }
+  });
+
+  /**
+   * 4) A user clicks leave room button,
+   * delete all of the user messages etc...
+   */
+  socket.on('leftRoom', async ({ userId, roomId }) => {
+    try {
+      await RoomMember.deleteOne({ userId, roomId });
+      await RoomMessage.deleteMany({ userId, roomId });
+
+      io.to(roomId).emit(
+        'userLeftRoom',
+        `user: ${userId} left room: ${roomId}...`
+      );
+
+      console.log(`user: ${userId} left room: ${roomId}...`);
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', 'Failed to leave room');
+    }
+  });
+
+  /**
+   * 3. A user logs out
+   */
+  socket.on('userLogout', async ({ userId }) => {
+    try {
+      // 1) Find all the rooms that this member is part of
+      const rooms = await RoomMember.find({ userId });
+
+      // 2) Go over each one and set online status to false
+      rooms.forEach(async (room) => {
+        room.online = false;
+
+        await room.save({ validateBeforeSave: false });
+      });
+
+      console.log('user loged out event...');
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', 'Failed to leave room after loging out...');
     }
   });
 

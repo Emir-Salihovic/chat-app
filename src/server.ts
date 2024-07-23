@@ -13,16 +13,10 @@ import RoomMessage from './models/messageModel';
 
 // SOCKET IO
 const server = http.createServer(app);
-const socketManager = new SocketManager(server);
+const socketManager = new SocketManager(server, { cors: { origin: '*' } });
 
-// Register the socket manager
+// Start the SocketManager
 socketManager.register();
-
-// const io = new Server(server, {
-//   cors: {
-//     origin: '*'
-//   }
-// });
 
 dotenv.config({ path: '.env' });
 

@@ -1,50 +1,41 @@
 import { Server as HttpServer } from 'http';
-import { Server as SocketIOServer, Socket } from 'socket.io';
+import { Server as SocketIOServer, Socket, ServerOptions } from 'socket.io';
+import Observable from './observer.service';
+import EventManager from './event.manager.service';
 
-class SocketManager {
+/**
+ * @description Class that manages Socket.io connections and handles event registration.
+ */
+class SocketManager extends Observable {
   private io: SocketIOServer;
-  private eventListeners: Map<string, (...args: any[]) => void>;
 
-  constructor(httpServer: HttpServer) {
-    this.io = new SocketIOServer(httpServer, {
-      cors: {
-        origin: '*'
-      }
-    });
-    this.eventListeners = new Map();
+  constructor(httpServer: HttpServer, socketOptions?: Partial<ServerOptions>) {
+    super();
+    this.io = new SocketIOServer(httpServer, socketOptions);
   }
 
+  // Registers event handlers for new Socket.io connections.
   public register(): void {
     this.io.on('connection', (socket: Socket) => {
       console.log(`User connected: ${socket.id}`);
 
-      // Register default event handlers
-      socket.on('disconnect', () => {
-        console.log(`User disconnected: ${socket.id}`);
+      // Create and register a single EventManager for each socket
+      const eventManager = new EventManager(socket);
+      this.addObserver(eventManager);
+
+      socket.onAny((event, ...args) => {
+        this.notifyObservers(event, args);
       });
 
-      // Additional event handlers can be registered here
+      socket.on('disconnect', () => {
+        console.log(`User disconnected: ${socket.id}`);
+        // Notify observers of the disconnection
+        this.notifyObservers('disconnect', { socket });
+      });
     });
   }
 
-  public on(
-    event: string,
-    handler: (socket: Socket, ...args: any[]) => void
-  ): void {
-    const listener = (socket: Socket, ...args: any[]) =>
-      handler(socket, ...args);
-    this.eventListeners.set(event, listener);
-    this.io.on(event, listener);
-  }
-
-  public off(event: string): void {
-    const listener = this.eventListeners.get(event);
-    if (listener) {
-      this.io.off(event, listener);
-      this.eventListeners.delete(event);
-    }
-  }
-
+  // Closes the Socket.io server.
   public close(): void {
     this.io.close();
   }

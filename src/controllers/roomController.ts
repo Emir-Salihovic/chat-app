@@ -105,7 +105,3 @@ export const getRoomMembersCount = asyncHandler(
     });
   }
 );
-
-export const leaveRoom = asyncHandler(
-  async (req: Request, res: Response) => {}
-);

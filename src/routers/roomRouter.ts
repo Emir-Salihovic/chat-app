@@ -18,10 +18,6 @@ router.get(
 );
 
 router
-  .route('/leave/:id')
-  .post(authController.protect, roomController.leaveRoom);
-
-router
   .route('/online/:id')
   .get(authController.protect, roomController.getOnlineRoomMembers);
 

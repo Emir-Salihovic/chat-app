@@ -38,6 +38,24 @@ const PORT = process.env.PORT || 6000;
 io.on('connection', (socket) => {
   console.log('a user connected');
 
+  socket.on('createRoom', () => {
+    io.emit('roomAdded', 'New room added...');
+  });
+
+  socket.on('deleteRoom', async ({ userId, roomId }) => {
+    try {
+      await Room.findOneAndDelete({ _id: roomId, creator: userId });
+      await RoomMessage.deleteMany({ roomId });
+      await RoomMember.deleteMany({ roomId });
+
+      io.emit('roomDeleted', `Room has been deleted by owner...`);
+      console.log('Room deleting event triggered...');
+    } catch (err) {
+      console.log('err', err);
+      socket.emit('error', 'Failed to delete room...');
+    }
+  });
+
   // Event: Join Room
   socket.on('joinRoom', async ({ userId, roomId }) => {
     if (!roomId || !userId) return;
@@ -159,7 +177,7 @@ io.on('connection', (socket) => {
   /**
    * 3. A user logs out
    */
-  socket.on('userLogout', async ({ userId }) => {
+  socket.on('userLogout', async ({ userId, roomId }) => {
     try {
       // 1) Find all the rooms that this member is part of
       const rooms = await RoomMember.find({ userId });
@@ -172,6 +190,8 @@ io.on('connection', (socket) => {
       });
 
       console.log('user loged out event...');
+
+      io.to(roomId).emit('userLogedOut', `user: ${userId} loged out...`);
     } catch (err) {
       console.error(err);
       socket.emit('error', 'Failed to leave room after loging out...');

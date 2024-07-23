@@ -2,6 +2,7 @@ import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, Socket, ServerOptions } from 'socket.io';
 import Observable from './observer.service';
 import EventManager from './event.manager.service';
+import { COMMON_EVENTS } from '../events';
 
 /**
  * @description Class that manages Socket.io connections and handles event registration.
@@ -16,7 +17,7 @@ class SocketManager extends Observable {
 
   // Registers event handlers for new Socket.io connections.
   public register(): void {
-    this.io.on('connection', (socket: Socket) => {
+    this.io.on(COMMON_EVENTS.CONNECT, (socket: Socket) => {
       console.log(`User connected: ${socket.id}`);
 
       // Create and register a single EventManager for each socket
@@ -27,7 +28,7 @@ class SocketManager extends Observable {
         this.notifyObservers(event, args);
       });
 
-      socket.on('disconnect', () => {
+      socket.on(COMMON_EVENTS.DISCONNECT, () => {
         console.log(`User disconnected: ${socket.id}`);
         // Notify observers of the disconnection
         this.notifyObservers('disconnect', { socket });

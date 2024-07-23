@@ -103,12 +103,6 @@ io.on('connection', (socket) => {
 
   // Event: Message sent in room
   socket.on('messageSent', async ({ userId, roomId, message }) => {
-    await RoomMessage.create({
-      userId,
-      roomId,
-      message
-    });
-
     const user = await User.findById(userId);
 
     if (!user) return;

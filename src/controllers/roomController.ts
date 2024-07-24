@@ -1,8 +1,9 @@
-import { Response, Request } from 'express';
+import { Response, Request, NextFunction } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import Room from '../models/roomModel';
 import { CustomRequest } from './authController';
 import RoomMember from '../models/roomMemberModel';
+import AppError from '../utils/appError';
 
 export const createRoom = asyncHandler(
   async (req: CustomRequest, res: Response) => {
@@ -29,14 +30,20 @@ export const getUserRooms = asyncHandler(
   }
 );
 
-export const getAllRooms = asyncHandler(async (req: Request, res: Response) => {
-  const rooms = await Room.find();
+export const getAllRooms = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const rooms = await Room.find();
 
-  res.status(200).json({
-    message: 'success',
-    rooms
-  });
-});
+    if (!rooms) {
+      return next(new AppError('No rooms found!', 404));
+    }
+
+    res.status(200).json({
+      message: 'success',
+      rooms
+    });
+  }
+);
 
 export const getRoomsJoinedByUser = asyncHandler(
   async (req: CustomRequest, res: Response) => {
@@ -52,10 +59,12 @@ export const getRoomsJoinedByUser = asyncHandler(
 );
 
 export const getSingleRoom = asyncHandler(
-  async (req: CustomRequest, res: Response) => {
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     const room = await Room.findById(req.params.id);
 
-    if (!room) return;
+    if (!room) {
+      return next(new AppError('Room does not exist!', 404));
+    }
 
     /*
     Check if the user trying to access the room

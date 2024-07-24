@@ -1,8 +1,8 @@
 {
   "configurations": [
     {
-      "command": "npm run dev:debug",
-      "name": "run npm run dev debug",
+      "command": "yarn start:dev",
+      "name": "run yarn start dev",
       "request": "launch",
       "type": "node-terminal",
       "cwd": "${workspaceFolder}"

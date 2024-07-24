@@ -3,6 +3,8 @@ import userRouter from './routers/userRouter';
 import roomRouter from './routers/roomRouter';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import AppError from './utils/appError';
+import globalErrorHandler from './controllers/errorController';
 
 const app = express();
 
@@ -21,5 +23,11 @@ app.get('/', (_: Request, response: Response) => {
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/rooms', roomRouter);
+
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use(globalErrorHandler);
 
 export default app;

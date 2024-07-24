@@ -106,12 +106,6 @@ export const getRoomMembersCount = asyncHandler(
       roomId: req.params.id
     }).countDocuments();
 
-    if (!roomMembersCount) {
-      return next(
-        new AppError('There was a problem getting the room members count!', 400)
-      );
-    }
-
     res.status(200).json({
       message: 'success',
       roomMembersCount

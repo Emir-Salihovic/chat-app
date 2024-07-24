@@ -16,13 +16,23 @@ const createSendToken = (
 ) => {
   const token = signToken(user._id as string);
 
-  res.cookie('jwt', token, {
-    expires: new Date(
-      +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
-  });
+  if (process.env.NODE_ENV === 'development') {
+    res.cookie('jwt', token, {
+      expires: new Date(
+        +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true
+    });
+  } else {
+    res.cookie('jwt', token, {
+      expires: new Date(
+        +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true
+    });
+  }
 
   // Remove password from output
   user.password = undefined!;

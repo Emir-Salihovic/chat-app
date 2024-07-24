@@ -169,7 +169,7 @@ io.on(COMMON_EVENTS.CONNECT, (socket) => {
   socket.on(ROOM_EVENTS.LEFT_ROOM, async ({ userId, roomId }) => {
     try {
       await RoomMember.deleteOne({ userId, roomId });
-      await RoomMessage.deleteMany({ userId, roomId });
+      // await RoomMessage.deleteMany({ userId, roomId });
 
       io.to(roomId).emit(
         ROOM_EVENTS.USER_LEFT_ROOM,

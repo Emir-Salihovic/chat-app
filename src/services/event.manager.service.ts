@@ -15,10 +15,19 @@ import User from '../models/userModel';
  * @description Class that handles specific events by implementing the Observer interface.
  */
 class EventManager implements Observer {
+  private static instance: EventManager;
   private socket: Socket;
 
   constructor(socket: Socket) {
     this.socket = socket;
+  }
+
+  public static getInstance(socket: Socket): EventManager {
+    if (!EventManager.instance) {
+      console.log('There is no event manager instance, I will create it...');
+      EventManager.instance = new EventManager(socket);
+    }
+    return EventManager.instance;
   }
 
   // Called when an event occurs, triggering the appropriate handler.

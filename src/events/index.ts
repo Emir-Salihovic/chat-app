@@ -21,7 +21,8 @@ export enum ROOM_EVENTS {
 
   JOINED_MESSAGE = 'message',
 
-  MESSAGE_SENT = 'messageSent'
+  MESSAGE_SENT = 'messageSent',
+  MESSAGE_RECEIVED = 'messageReceived'
 }
 
 export enum ERROR_EVENTS {

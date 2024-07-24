@@ -6,11 +6,15 @@ import RoomMember from '../models/roomMemberModel';
 import AppError from '../utils/appError';
 
 export const createRoom = asyncHandler(
-  async (req: CustomRequest, res: Response) => {
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     const newRoom = await Room.create({
       name: req.body.name,
       creator: req?.user?._id
     });
+
+    if (!newRoom) {
+      return next(new AppError('There was a problem creating the room!', 400));
+    }
 
     res.status(201).json({
       message: 'success',
@@ -30,20 +34,14 @@ export const getUserRooms = asyncHandler(
   }
 );
 
-export const getAllRooms = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const rooms = await Room.find();
+export const getAllRooms = asyncHandler(async (req: Request, res: Response) => {
+  const rooms = await Room.find();
 
-    if (!rooms) {
-      return next(new AppError('No rooms found!', 404));
-    }
-
-    res.status(200).json({
-      message: 'success',
-      rooms
-    });
-  }
-);
+  res.status(200).json({
+    message: 'success',
+    rooms
+  });
+});
 
 export const getRoomsJoinedByUser = asyncHandler(
   async (req: CustomRequest, res: Response) => {
@@ -98,7 +96,7 @@ export const getOnlineRoomMembers = asyncHandler(
 );
 
 export const getRoomMembersCount = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     /**
      * When joining room on socket event we made sure
      * that the document cannot be created if it already
@@ -107,6 +105,12 @@ export const getRoomMembersCount = asyncHandler(
     const roomMembersCount = await RoomMember.find({
       roomId: req.params.id
     }).countDocuments();
+
+    if (!roomMembersCount) {
+      return next(
+        new AppError('There was a problem getting the room members count!', 400)
+      );
+    }
 
     res.status(200).json({
       message: 'success',

@@ -3,49 +3,52 @@ import User, { IUser } from '../models/userModel';
 import asyncHandler from '../utils/asyncHandler';
 import createSendToken from '../utils/signToken';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import AppError from '../utils/appError';
 
 export interface CustomRequest extends Request {
   user?: IUser;
 }
 
-export const signup = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.body?.username || !req.body?.password) {
-    res.status(400).json({
-      error: 'Please provide username and password.'
+export const signup = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body?.username || !req.body?.password) {
+      return next(new AppError('Please provide username and password.', 400));
+    }
+
+    const newUser = await User.create({
+      username: req.body?.username,
+      password: req.body?.password
     });
+
+    if (!newUser) {
+      return next(
+        new AppError('There was a problem with creating your account!', 400)
+      );
+    }
+
+    createSendToken(newUser, 201, req, res);
   }
+);
 
-  const newUser = await User.create({
-    username: req.body?.username,
-    password: req.body?.password
-  });
+export const login = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { username, password } = req.body;
 
-  createSendToken(newUser, 201, req, res);
-});
+    // 1) Check if username and password exist
+    if (!username || !password) {
+      return next(new AppError('Please provide username and password.', 400));
+    }
+    // 2) Check if user exists && password is correct
+    const user = await User.findOne({ username }).select('+password');
 
-export const login = asyncHandler(async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+    if (!user || !(await user.correctPassword(password, user.password))) {
+      return next(new AppError('Incorrect username or password!', 400));
+    }
 
-  // 1) Check if username and password exist
-  if (!username || !password) {
-    res.status(400).json({
-      error: 'Please provide username and password.'
-    });
-    return;
+    // 3) If everything ok, send token to client
+    createSendToken(user as IUser, 200, req, res);
   }
-  // 2) Check if user exists && password is correct
-  const user = await User.findOne({ username }).select('+password');
-
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    res.status(401).json({
-      error: 'Incorrect username or password'
-    });
-    return;
-  }
-
-  // 3) If everything ok, send token to client
-  createSendToken(user as IUser, 200, req, res);
-});
+);
 
 export const logout = (_: Request, res: Response) => {
   res.cookie('jwt', 'loggedout', {
@@ -70,11 +73,9 @@ export const protect = asyncHandler(
     }
 
     if (!token) {
-      res.status(401).json({
-        error: 'You are not logged in! Please log in to get access.'
-      });
-
-      return;
+      return next(
+        new AppError('You are not logged in! Please log in to get access.', 401)
+      );
     }
 
     // 2) Verification token
@@ -91,11 +92,12 @@ export const protect = asyncHandler(
     const currentUser = await User.findById(decoded.id);
 
     if (!currentUser) {
-      res.status(401).json({
-        error: 'The user belonging to this token does no longer exist.'
-      });
-
-      return;
+      return next(
+        new AppError(
+          'The user belonging to this token does no longer exist!',
+          404
+        )
+      );
     }
 
     // GRANT ACCESS TO PROTECTED ROUTE

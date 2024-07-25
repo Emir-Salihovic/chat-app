@@ -1,21 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
-
 const AppError = require('./../utils/appError');
 
-const handleCastErrorDB = (err: any) => {
+interface CustomError extends Error {
+  statusCode?: number;
+  status?: string;
+  path?: string;
+  value?: string;
+  errmsg?: string;
+  errors?: { [key: string]: { message: string } };
+  code?: number;
+  isOperational: boolean;
+}
+
+const handleCastErrorDB = (err: CustomError) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
   return new AppError(message, 400);
 };
 
-const handleDuplicateFieldsDB = (err: any) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+const handleDuplicateFieldsDB = (err: CustomError) => {
+  const value = err.errmsg?.match(/(["'])(\\?.)*?\1/)?.[0];
 
   const message = `Duplicate field value: ${value}. Please use another value!`;
   return new AppError(message, 400);
 };
 
-const handleValidationErrorDB = (err: any) => {
-  const errors = Object.values(err.errors).map((el: any) => el.message);
+const handleValidationErrorDB = (err: CustomError) => {
+  const errors = Object.values(err.errors ?? {}).map((el) => el.message);
 
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
@@ -27,8 +37,8 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError('Your token has expired! Please log in again.', 401);
 
-const sendErrorDev = (err: any, req: Request, res: Response) => {
-  return res.status(err.statusCode).json({
+const sendErrorDev = (err: CustomError, req: Request, res: Response) => {
+  return res.status(err.statusCode || 500).json({
     status: err.status,
     error: err,
     message: err.message,
@@ -36,17 +46,17 @@ const sendErrorDev = (err: any, req: Request, res: Response) => {
   });
 };
 
-const sendErrorProd = (err: any, req: Request, res: Response) => {
+const sendErrorProd = (err: CustomError, req: Request, res: Response) => {
   // A) Operational, trusted error: send message to client
   if (err.isOperational) {
-    return res.status(err.statusCode).json({
+    return res.status(err.statusCode || 500).json({
       status: err.status,
       message: err.message
     });
   }
   // B) Programming or other unknown error: don't leak error details
   // 1) Log error
-  console.error('ERROR 💥', err);
+  // console.error('ERROR 💥', err);
   // 2) Send generic message
   return res.status(500).json({
     status: 'error',
@@ -54,7 +64,12 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
   });
 };
 
-export default (err: any, req: Request, res: Response, _: NextFunction) => {
+export default (
+  err: CustomError,
+  req: Request,
+  res: Response,
+  _: NextFunction
+) => {
   // console.log(err.stack);
 
   err.statusCode = err.statusCode || 500;

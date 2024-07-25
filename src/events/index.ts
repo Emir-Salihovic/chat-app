@@ -19,6 +19,11 @@ export enum ROOM_EVENTS {
   USER_LOGOUT = 'userLogout',
   USER_LOGED_OUT = 'userLogedOut',
 
+  USER_STARTED_TYPING = 'userStartedTyping',
+  USER_IS_TYPING = 'userIsTyping',
+  USER_STOPPED_TYPING = 'userStoppedTyping',
+  USER_IS_NOT_TYPING = 'userIsNotTyping',
+
   JOINED_MESSAGE = 'message',
 
   MESSAGE_SENT = 'messageSent',

@@ -172,6 +172,45 @@ const handleUserLogout = (io: Server, socket: Socket) => {
   });
 };
 
+const handleUserTyping = (socket: Socket) => {
+  socket.on(ROOM_EVENTS.USER_STARTED_TYPING, async ({ userId }) => {
+    try {
+      // 1) User that is typing
+      const user = await User.findById(userId);
+
+      if (!user) return;
+
+      console.log(`${user.username} is typing...`);
+      socket.broadcast.emit(ROOM_EVENTS.USER_IS_TYPING, {
+        userId,
+        message: `${user.username} is typing...`
+      });
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', 'Failed to trigger user started typing event...');
+    }
+  });
+
+  socket.on(ROOM_EVENTS.USER_STOPPED_TYPING, async ({ userId }) => {
+    console.log('user stoped typing event...');
+    try {
+      // 1) User that is typing
+      const user = await User.findById(userId);
+
+      if (!user) return;
+
+      console.log(`${user.username} stoped typing...`);
+      socket.broadcast.emit(ROOM_EVENTS.USER_IS_NOT_TYPING, {
+        userId,
+        message: `${user.username} stopped typing...`
+      });
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', 'Failed to trigger user stopped typing event...');
+    }
+  });
+};
+
 const initializeSocket = (io: Server) => {
   io.on(COMMON_EVENTS.CONNECT, (socket: Socket) => {
     console.log('a user connected');
@@ -183,6 +222,7 @@ const initializeSocket = (io: Server) => {
     handleRoomChanged(io, socket);
     handleRoomLeaving(io, socket);
     handleUserLogout(io, socket);
+    handleUserTyping(socket);
 
     // Handle disconnection
     socket.on(COMMON_EVENTS.DISCONNECT, () => {

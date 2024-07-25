@@ -4,7 +4,6 @@ jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(() => 'fake-token') // Mock the sign function to return a fake token
 }));
 
-// Mock createSendToken
 jest.mock('../src/utils/signToken', () => {
   const actualModule = jest.requireActual('../src/utils/signToken');
   return {
@@ -21,7 +20,7 @@ jest.mock('../src/controllers/authController', () => {
   return {
     ...actualModule,
     protect: jest.fn((req, res, next) => {
-      req.user = { id: 'mockUserId', username: 'mockUser' };
+      req.user = { _id: 'userId123', username: 'mockUser' };
       next();
     })
   };

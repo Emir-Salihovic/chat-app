@@ -46,7 +46,7 @@ export const login = asyncHandler(
     }
 
     // 3) If everything ok, send token to client
-    createSendToken(user as IUser, 200, req, res);
+    createSendToken(user!, 200, req, res);
   }
 );
 

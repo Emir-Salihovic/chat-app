@@ -24,6 +24,15 @@ afterAll(async () => {
  * @description Happy path.
  */
 describe('Auth Controller - Signup', () => {
+  beforeEach(() => {
+    // Reset mock implementation before each test
+    (createSendToken as jest.Mock).mockImplementation(
+      (user, statusCode, req, res) => {
+        res.status(statusCode).json({ token: 'fake-token', data: { user } });
+      }
+    );
+  });
+
   it('should register a new user and send a token', async () => {
     // Arrange
     const mockUser = {
@@ -34,13 +43,6 @@ describe('Auth Controller - Signup', () => {
 
     // Mock User.create to return the mockUser
     (User.create as jest.Mock).mockResolvedValue(mockUser);
-
-    // Mock createSendToken to return a fake token
-    (createSendToken as jest.Mock).mockImplementation(
-      (user, statusCode, req, res) => {
-        res.status(201).json({ token: 'fake-token', data: { user: mockUser } });
-      }
-    );
 
     // Act
     const response = await request(app)
@@ -56,12 +58,7 @@ describe('Auth Controller - Signup', () => {
       password: 'password'
     });
   });
-});
 
-/**
- * @description If username or password is missing.
- */
-describe('Auth Controller - Signup', () => {
   it('should return 400 if username or password is missing', async () => {
     const response = await request(app)
       .post('/api/v1/users/signup')
@@ -75,5 +72,108 @@ describe('Auth Controller - Signup', () => {
       'message',
       'Please provide username and password.'
     );
-  }, 10000);
+  });
+});
+
+describe('Auth Controller - Login', () => {
+  it('should log in a user and return a token', async () => {
+    // Arrange
+    const mockUser = {
+      _id: '123456789',
+      username: 'testuser',
+      password: 'hashedpassword',
+      correctPassword: jest.fn().mockResolvedValue(true)
+    };
+
+    // Mock UserModel.find to return an object with the select method
+    (User.findOne as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue(mockUser)
+    });
+
+    // Mock createSendToken to return a fake token
+    (createSendToken as jest.Mock).mockImplementation(
+      (user, statusCode, req, res) => {
+        res.status(statusCode).json({ token: 'fake-token', data: { user } });
+      }
+    );
+
+    // Act
+    const response = await request(app)
+      .post('/api/v1/users/login')
+      .send({ username: 'testuser', password: 'password' });
+
+    // Assert
+    expect(response.status).toBe(200); // Expect 200 status
+    expect(response.body).toHaveProperty('token');
+    expect(response.body).toHaveProperty('data');
+    expect(User.findOne).toHaveBeenCalledWith({ username: 'testuser' });
+    expect(mockUser.correctPassword).toHaveBeenCalledWith(
+      'password',
+      'hashedpassword'
+    );
+  });
+
+  it('should return 400 if username or password is missing', async () => {
+    const response = await request(app)
+      .post('/api/v1/users/login')
+      .send({ username: 'testuser' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('error');
+    expect(response.body.message).toBe('Please provide username and password.');
+  });
+
+  it('should return 400 if username is incorrect', async () => {
+    // Mock RoomMember.find to return an object with the select method
+    (User.findOne as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue(null)
+    });
+
+    const response = await request(app)
+      .post('/api/v1/users/login')
+      .send({ username: 'wronguser', password: 'password' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('error');
+    expect(response.body.message).toBe('Incorrect username or password!');
+  });
+
+  it('should return 400 if password is incorrect', async () => {
+    const mockUser = {
+      _id: '123456789',
+      username: 'testuser',
+      password: 'hashedpassword',
+      correctPassword: jest.fn().mockResolvedValue(false) // Incorrect password
+    };
+
+    // Mock RoomMember.find to return an object with the select method
+    (User.findOne as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue(mockUser)
+    });
+    const response = await request(app)
+      .post('/api/v1/users/login')
+      .send({ username: 'testuser', password: 'wrongpassword' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('error');
+    expect(response.body.message).toBe('Incorrect username or password!');
+  });
+});
+
+describe('Auth Controller - Logout', () => {
+  it('should clear the JWT cookie and return a success message', async () => {
+    // Act
+    const response = await request(app)
+      .post('/api/v1/users/logout') // Example endpoint
+      .send();
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('status', 'success');
+
+    // Assert that the cookie is set correctly
+    expect(response.header['set-cookie']).toEqual(
+      expect.arrayContaining([expect.stringContaining('jwt=loggedout')])
+    );
+  });
 });

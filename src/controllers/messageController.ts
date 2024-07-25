@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import { CustomRequest } from './authController';
 import RoomMessage from '../models/messageModel';

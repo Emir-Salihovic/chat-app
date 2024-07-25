@@ -10,7 +10,7 @@ export const whoAmI = asyncHandler(
 
     if (!user) {
       return next(
-        new AppError('There was a problem fetching your profile data.', 400)
+        new AppError('There was a problem fetching your profile data.', 404)
       );
     }
 

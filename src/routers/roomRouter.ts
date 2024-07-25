@@ -10,7 +10,11 @@ const limiter = rateLimit({
   limit: 10, // each IP can make up to 10 requests per `windowsMs` (2 minutes)
   standardHeaders: true, // add the `RateLimit-*` headers to the response
   legacyHeaders: false, // remove the `X-RateLimit-*` headers from the response
-  message: 'You are only allowed to send 10 messages in 2 minutes!'
+  message: 'You are only allowed to send 10 messages in 2 minutes!',
+  keyGenerator: function (req: authController.CustomRequest) {
+    const userId = req?.user?._id as string;
+    return userId.toString();
+  }
 });
 
 const router = express.Router();
@@ -37,7 +41,7 @@ router
 router
   .route('/messages/:id')
   .get(authController.protect, messageController.getRoomMessages)
-  .post(limiter, authController.protect, messageController.createRoomMessage);
+  .post(authController.protect, limiter, messageController.createRoomMessage);
 
 router.route('/:id').get(authController.protect, roomController.getSingleRoom);
 

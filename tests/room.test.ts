@@ -1,8 +1,8 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import app from '../src/app';
-import Room from '../src/models/roomModel';
-import RoomMember from '../src/models/roomMemberModel';
+import Room, { IRoom } from '../src/models/roomModel';
+import RoomMember, { IRoomMember } from '../src/models/roomMemberModel';
 
 // Mock models
 jest.mock('../src/models/roomModel');
@@ -104,7 +104,7 @@ describe('Room Controller - Get All Rooms', () => {
   it('should return an empty array if no rooms are found', async () => {
     // Arrange
     // No rooms found
-    const mockRooms: any[] = [];
+    const mockRooms: IRoom[] = [];
 
     // Mock Room.find to return an empty array
     (Room.find as jest.Mock).mockResolvedValue(mockRooms);
@@ -182,7 +182,7 @@ describe('Room Controller - Get Single Room', () => {
 describe('Room Controller - Get Online Room Members', () => {
   it('should return an empty array if no room online members are found', async () => {
     // Arrange
-    const mockOnlineMembers: any[] = [];
+    const mockOnlineMembers: IRoomMember[] = [];
 
     // Mock RoomMember.find to return an object with the select method
     (RoomMember.find as jest.Mock).mockReturnValue({

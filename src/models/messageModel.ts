@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-interface IRoomMessage extends Document {
+export interface IRoomMessage extends Document {
   userId: mongoose.Schema.Types.ObjectId;
   roomId: mongoose.Schema.Types.ObjectId;
   message: string;

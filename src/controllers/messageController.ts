@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import { CustomRequest } from './authController';
-import RoomMessage from '../models/messageModel';
+import RoomMessage, { IRoomMessage } from '../models/messageModel';
 import RoomMember from '../models/roomMemberModel';
 import AppError from '../utils/appError';
 
@@ -28,7 +28,7 @@ export const createRoomMessage = asyncHandler(
 
 export const getRoomMessages = asyncHandler(
   async (req: CustomRequest, res: Response) => {
-    let roomMessages: any = [];
+    let roomMessages: IRoomMessage[] = [];
 
     /**
      * Check if the user should see the messages.

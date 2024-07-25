@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface Room extends Document {
+export interface IRoom extends Document {
   name: string;
 }
 
@@ -14,6 +14,6 @@ const roomSchema: Schema = new Schema(
   }
 );
 
-const Room = mongoose.model<Room>('Room', roomSchema);
+const Room = mongoose.model<IRoom>('Room', roomSchema);
 
 export default Room;

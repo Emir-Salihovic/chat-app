@@ -17,7 +17,6 @@ const router = express.Router();
 
 router
   .route('/')
-  // .get(authController.protect, roomController.getAllRooms)
   .get(roomController.getAllRooms)
   .post(authController.protect, roomController.createRoom);
 

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import app from '../src/app';
-import User, { IUser } from '../src/models/userModel';
+import User from '../src/models/userModel';
 import createSendToken from '../src/utils/signToken';
 
 // Mock the user model
@@ -68,9 +68,12 @@ describe('Auth Controller - Signup', () => {
       .send({ username: 'testuser' });
 
     expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('status', 'failed');
+    expect(response.body.error).toHaveProperty('statusCode', 400);
+    expect(response.body.error).toHaveProperty('status', 'failed');
     expect(response.body).toHaveProperty(
-      'error',
+      'message',
       'Please provide username and password.'
     );
-  });
+  }, 10000);
 });

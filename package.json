@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node src/server.ts",
     "start:dev": "nodemon src/server.ts",
-    "start:prod": "NODE_ENV=production yarn start:dev",
+    "start:prod": "NODE_ENV=production yarn start",
     "build": "tsc",
     "serve": "NODE_ENV=production & node dist/server.js",
     "docker:up": "docker compose up --build",

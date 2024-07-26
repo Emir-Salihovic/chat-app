@@ -16,24 +16,33 @@ const createSendToken = (
 ) => {
   const token = signToken(user._id as string);
 
-  if (process.env.NODE_ENV === 'development') {
-    res.cookie('jwt', token, {
-      expires: new Date(
-        +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true
-    });
-  } else {
-    res.cookie('jwt', token, {
-      expires: new Date(
-        +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-      sameSite: 'none'
-    });
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   res.cookie('jwt', token, {
+  //     expires: new Date(
+  //       +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
+  //     ),
+  //     httpOnly: true,
+  //     sameSite: 'none',
+  //     secure: true
+  //   });
+  // } else {
+  //   res.cookie('jwt', token, {
+  //     expires: new Date(
+  //       +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
+  //     ),
+  //     httpOnly: true,
+  //     sameSite: 'none'
+  //   });
+  // }
+
+  res.cookie('jwt', token, {
+    expires: new Date(
+      +Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN! * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true
+  });
 
   // Remove password from output
   user.password = undefined!;

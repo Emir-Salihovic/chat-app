@@ -34,7 +34,7 @@ To get started with the Chat-App, follow these steps:
 1.  **Clone the repository:**
 
     ```
-    git clone <https://github.com/yourusername/chat-app.git>
+    git clone <https://github.com/Emir-Salihovic/chat-app.git>
     cd chat-app
     ```
 

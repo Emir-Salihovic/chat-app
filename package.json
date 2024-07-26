@@ -9,7 +9,7 @@
     "start:prod": "NODE_ENV=production yarn start",
     "build": "tsc",
     "serve": "NODE_ENV=production & node dist/server.js",
-    "docker:up": "docker compose up --build",
+    "docker:up": "docker compose up",
     "docker:down": "docker compose down",
     "test": "jest"
   },

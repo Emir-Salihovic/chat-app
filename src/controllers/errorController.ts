@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-const AppError = require('./../utils/appError');
+import AppError from '../utils/appError';
 
 interface CustomError extends Error {
   statusCode?: number;
